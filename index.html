@@ -1,5 +1,7 @@
 {{ template "head" . }}
 <div class="center galleries">
+	<h1>Egon Elbre</h1>
+
 	{{ range $index, $gallery := .Galleries }}
 	<div class="gallery-preview">
 		<a href="{{$gallery.PageLink}}">{{$gallery.Name}}</a>

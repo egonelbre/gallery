@@ -1,8 +1,13 @@
 {{ template "head" . }}
 <div class="single-image">
 	<div class="overlay">
-		<a class="return" href="{{.Gallery.PageLink}}">Back to {{.Gallery.Name}}</a>
+		<div><a class="return" href="{{.Gallery.PageLink}}">Back to {{.Gallery.Name}}</a></div>
 		<h2>{{.Title}}</h2>
+		<div>
+			{{if .Prev}}<a class="return" href="{{.Prev}}">🡄 Prev</a>{{end}}
+			{{if (and .Prev .Next)}}|{{end}}
+			{{if .Next}}<a class="return" href="{{.Next}}">Next 🡆</a>{{end}}
+		</div>
 	</div>
 	<div>
 		<img src="{{.Image.ImageLink}}" alt="{{.Image.Name}}">

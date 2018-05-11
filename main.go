@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"flag"
 	"html/template"
 	"image"
 	"image/jpeg"
@@ -38,6 +39,7 @@ func (gallery *Gallery) FirstImages(n int) []*Image {
 
 type Image struct {
 	Name    string
+	Raw     string
 	Path    string
 	Thumb   string
 	Unbound string
@@ -62,6 +64,7 @@ const (
 )
 
 var T = template.Must(template.ParseGlob("*.html"))
+var pagesonly = flag.Bool("pages", false, "generate only pages")
 
 func main() {
 	galleries := map[string]*Gallery{}
@@ -93,6 +96,7 @@ func main() {
 
 		gallery.Images = append(gallery.Images, &Image{
 			Name:    ReplaceExt(filepath.Base(path), ""),
+			Raw:     path,
 			Path:    path,
 			Unbound: strings.TrimPrefix(path, imagesDir+string(filepath.Separator)),
 			Info:    info,
@@ -106,25 +110,43 @@ func main() {
 			return gallery.Images[k].Info.ModTime().Before(gallery.Images[i].Info.ModTime())
 		})
 
+		// update paths
 		for _, image := range gallery.Images {
-			m, err := LoadImage(image.Path)
-			if err != nil {
-				log.Println(err)
-				continue
-			}
-
-			thumb := Downscale(m, thumbsize)
 			image.Thumb = filepath.Join("thumbs", ReplaceExt(image.Unbound, ".png"))
-			SavePNG(thumb, filepath.Join("public", image.Thumb))
-
-			large := Downscale(m, largesize)
 			image.Path = ReplaceExt(image.Path, ".jpg")
-			SaveJPG(large, filepath.Join("public", image.Path))
+		}
+
+		// generate images
+		if !*pagesonly {
+			for _, image := range gallery.Images {
+				m, err := LoadImage(image.Raw)
+				if err != nil {
+					log.Println(err)
+					continue
+				}
+				thumb := Downscale(m, thumbsize)
+				SavePNG(thumb, filepath.Join("public", image.Thumb))
+				large := Downscale(m, largesize)
+				SaveJPG(large, filepath.Join("public", image.Path))
+			}
+		}
+
+		// generate pages
+		for i, image := range gallery.Images {
+			var prev, next string
+			if i > 0 {
+				prev = gallery.Images[i-1].PageLink()
+			}
+			if i+1 < len(gallery.Images) {
+				next = gallery.Images[i+1].PageLink()
+			}
 
 			CreatePage(ReplaceExt(image.Unbound, ".html"), "image.html", map[string]interface{}{
 				"Title":   image.Name,
 				"Gallery": gallery,
 				"Image":   image,
+				"Prev":    prev,
+				"Next":    next,
 			})
 		}
 

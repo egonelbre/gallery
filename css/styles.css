@@ -42,6 +42,12 @@ a {
     max-height: 128px;
 }
 
+.gallery .images {
+    display: flex;
+    flex-flow: wrap row;
+    justify-content: center;
+}
+
 .gallery .image {
     display: inline-block;
     margin-right: 10px;
