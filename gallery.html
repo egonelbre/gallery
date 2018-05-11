@@ -1,0 +1,13 @@
+{{ template "head" . }}
+<div class="center gallery">
+	<a class="return" href="/">Back to Galleries</a>
+	<h1>{{.Title}}</h1>
+	<div>
+	{{ range $index, $image := .Gallery.Images }}
+	<div class="image">
+		<a href="{{$image.PageLink}}"><img src="{{$image.ThumbLink}}" alt="{{$image.Name}}"></a>
+	</div>
+	{{ end }}
+	</div>
+</div>
+{{ template "foot" . }}

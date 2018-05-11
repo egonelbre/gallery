@@ -1,0 +1,14 @@
+{{ template "head" . }}
+<div class="center galleries">
+	{{ range $index, $gallery := .Galleries }}
+	<div class="gallery-preview">
+		<a href="{{$gallery.PageLink}}">{{$gallery.Name}}</a>
+		<div class="gallery-previews">
+			{{ range $index, $image := $gallery.FirstImages 3 }}
+			<a href="{{$image.PageLink}}"><img src="{{$image.ThumbLink}}" alt="{{$image.Name}}"></a>
+			{{ end }}
+		</div>
+	</div>
+	{{ end }}
+</div>
+{{ template "foot" . }}

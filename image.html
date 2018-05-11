@@ -1,0 +1,9 @@
+{{ template "head" . }}
+<div class="single-image">
+	<a class="return" href="{{.Gallery.PageLink}}">Back to {{.Gallery.Name}}</a>
+	<h2>{{.Title}}</h2>
+	<div>
+		<img src="{{.Image.ImageLink}}" alt="{{.Image.Name}}">
+	</div>
+</div>
+{{ template "foot" . }}

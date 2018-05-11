@@ -1,0 +1,46 @@
+* {
+	box-sizing: border-box;
+}
+
+html, body {
+	background: #000;
+	margin: 1rem 0.5rem;
+	color: #fff;
+
+    font-size: 16px;
+    line-height: 26px;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+
+    font-family: Ubuntu, Roboto;
+}
+
+.center {
+}
+
+img {
+	max-width: 100%;
+}
+
+h1 {
+	margin: 3rem 0;
+}
+
+a {
+	color: #fff;
+}
+
+.gallery-preview {
+	margin-bottom: 1rem;
+}
+
+.gallery-preview img {
+	max-height: 128px;
+}
+
+.gallery .image {
+	display: inline-block;
+	margin-right: 10px;
+	margin-bottom: 10px;
+}
