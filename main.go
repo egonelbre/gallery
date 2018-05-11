@@ -118,8 +118,8 @@ func main() {
 			SavePNG(thumb, filepath.Join("public", image.Thumb))
 
 			large := Downscale(m, largesize)
-			image.Path = ReplaceExt(image.Path, ".png")
-			SavePNG(large, filepath.Join("public", image.Path))
+			image.Path = ReplaceExt(image.Path, ".jpg")
+			SaveJPG(large, filepath.Join("public", image.Path))
 
 			CreatePage(ReplaceExt(image.Unbound, ".html"), "image.html", map[string]interface{}{
 				"Title":   image.Name,
@@ -191,7 +191,7 @@ func SaveJPG(m image.Image, path string) error {
 		return err
 	}
 	defer file.Close()
-	return jpeg.Encode(file, m, &jpeg.Options{Quality: 90})
+	return jpeg.Encode(file, m, &jpeg.Options{Quality: 93})
 }
 
 func SavePNG(m image.Image, path string) error {
