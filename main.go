@@ -56,7 +56,10 @@ func (image *Image) ThumbLink() string {
 	return path.Join("/", filepath.ToSlash(image.Thumb))
 }
 
-const thumbsize = 256
+const (
+	largesize = 1024
+	thumbsize = 256
+)
 
 var T = template.Must(template.ParseGlob("*.html"))
 
@@ -110,9 +113,13 @@ func main() {
 				continue
 			}
 
-			t := CreateThumbnail(m)
+			thumb := Downscale(m, thumbsize)
 			image.Thumb = filepath.Join("thumbs", ReplaceExt(image.Unbound, ".png"))
-			SavePNG(t, filepath.Join("public", image.Thumb))
+			SavePNG(thumb, filepath.Join("public", image.Thumb))
+
+			large := Downscale(m, largesize)
+			image.Path = ReplaceExt(image.Path, ".png")
+			SavePNG(large, filepath.Join("public", image.Path))
 
 			CreatePage(ReplaceExt(image.Unbound, ".html"), "image.html", map[string]interface{}{
 				"Title":   image.Name,
@@ -132,7 +139,6 @@ func main() {
 		"Galleries": galleries,
 	})
 
-	log.Println(CopyDir(imagesDir, filepath.Join("public", imagesDir)))
 	log.Println(CopyDir("css", filepath.Join("public", "css")))
 
 	if err != nil {
@@ -163,9 +169,13 @@ func CreatePage(name string, template string, data interface{}) {
 	ioutil.WriteFile(name, buffer.Bytes(), 0755)
 }
 
-func CreateThumbnail(m image.Image) image.Image {
-	targetSize := image.Point{0, thumbsize}
-	targetSize.X = m.Bounds().Dx() * thumbsize / m.Bounds().Dy()
+func Downscale(m image.Image, maxwidth int) image.Image {
+	if m.Bounds().Dx() <= maxwidth {
+		return m
+	}
+
+	targetSize := image.Point{0, maxwidth}
+	targetSize.X = m.Bounds().Dx() * maxwidth / m.Bounds().Dy()
 	inner := image.Rectangle{image.ZP, targetSize}
 	rgba := image.NewRGBA(inner)
 	draw.CatmullRom.Scale(rgba, rgba.Bounds(), m, m.Bounds(), draw.Over, nil)

@@ -1,11 +1,14 @@
 * {
-	box-sizing: border-box;
+    box-sizing: border-box;
 }
 
 html, body {
-	background: #000;
-	margin: 1rem 0.5rem;
-	color: #fff;
+    background: #000;
+    margin: 1rem 0.5rem;
+    color: #fff;
+    text-shadow: 
+        1px 1px 1px #000,
+        -1px -1px 1px #000;
 
     font-size: 16px;
     line-height: 26px;
@@ -20,27 +23,46 @@ html, body {
 }
 
 img {
-	max-width: 100%;
+    max-width: 100%;
 }
 
 h1 {
-	margin: 3rem 0;
+    margin: 3rem 0;
 }
 
 a {
-	color: #fff;
+    color: #fff;
 }
 
 .gallery-preview {
-	margin-bottom: 1rem;
+    margin-bottom: 1rem;
 }
 
 .gallery-preview img {
-	max-height: 128px;
+    max-height: 128px;
 }
 
 .gallery .image {
-	display: inline-block;
-	margin-right: 10px;
-	margin-bottom: 10px;
+    display: inline-block;
+    margin-right: 10px;
+    margin-bottom: 10px;
+}
+
+.single-image {}
+
+.single-image img {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-width: 100%;
+    max-height: 100%;
+    margin: auto;
+    overflow: auto;
+}
+
+.overlay {
+    position: fixed;
+    z-index: 1000;
 }

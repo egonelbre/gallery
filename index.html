@@ -4,7 +4,7 @@
 	<div class="gallery-preview">
 		<a href="{{$gallery.PageLink}}">{{$gallery.Name}}</a>
 		<div class="gallery-previews">
-			{{ range $index, $image := $gallery.FirstImages 3 }}
+			{{ range $index, $image := $gallery.FirstImages 6 }}
 			<a href="{{$image.PageLink}}"><img src="{{$image.ThumbLink}}" alt="{{$image.Name}}"></a>
 			{{ end }}
 		</div>
