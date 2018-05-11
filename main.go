@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"flag"
+	"fmt"
 	"html/template"
 	"image"
 	"image/jpeg"
@@ -13,9 +14,11 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"runtime"
 	"sort"
 	"strings"
 
+	"github.com/egonelbre/async"
 	"golang.org/x/image/draw"
 )
 
@@ -65,8 +68,11 @@ const (
 
 var T = template.Must(template.ParseGlob("*.html"))
 var pagesonly = flag.Bool("pages", false, "generate only pages")
+var regenerate = flag.Bool("regenerate", false, "generate only pages")
 
 func main() {
+	flag.Parse()
+
 	galleries := map[string]*Gallery{}
 
 	imagesDir := "images"
@@ -118,17 +124,33 @@ func main() {
 
 		// generate images
 		if !*pagesonly {
-			for _, image := range gallery.Images {
+			async.Iter(len(gallery.Images), runtime.GOMAXPROCS(-1), func(i int) {
+				image := gallery.Images[i]
+
+				fmt.Println("Downscaling ", gallery.Name, image.Name)
+				thumbname := filepath.Join("public", image.Thumb)
+				imagename := filepath.Join("public", image.Path)
+
+				if !*regenerate && FileExists(thumbname) && FileExists(imagename) {
+					return
+				}
+
 				m, err := LoadImage(image.Raw)
 				if err != nil {
 					log.Println(err)
-					continue
+					return
 				}
+
 				thumb := Downscale(m, thumbsize)
-				SavePNG(thumb, filepath.Join("public", image.Thumb))
+				if *regenerate || !FileExists(thumbname) {
+					SavePNG(thumb, thumbname)
+				}
+
 				large := Downscale(m, largesize)
-				SaveJPG(large, filepath.Join("public", image.Path))
-			}
+				if *regenerate || !FileExists(imagename) {
+					SaveJPG(large, imagename)
+				}
+			})
 		}
 
 		// generate pages
@@ -166,6 +188,11 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func FileExists(path string) bool {
+	_, err := os.Lstat(path)
+	return err == nil
 }
 
 func LoadImage(path string) (image.Image, error) {
