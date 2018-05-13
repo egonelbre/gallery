@@ -18,7 +18,9 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/disintegration/imaging"
 	"github.com/egonelbre/async"
+	"github.com/rwcarlsen/goexif/exif"
 	"golang.org/x/image/draw"
 )
 
@@ -128,6 +130,7 @@ func main() {
 				image := gallery.Images[i]
 
 				fmt.Println("Downscaling ", gallery.Name, image.Name)
+
 				thumbname := filepath.Join("public", image.Thumb)
 				imagename := filepath.Join("public", image.Path)
 
@@ -200,10 +203,12 @@ func LoadImage(path string) (image.Image, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer file.Close()
-
 	m, _, err := image.Decode(file)
-	return m, err
+	file.Close()
+
+	orientation := ExifOrientation(path)
+	rm := reorient(m, orientation)
+	return rm, err
 }
 
 func CreatePage(name string, template string, data interface{}) {
@@ -318,4 +323,64 @@ func CopyFile(src, dst string) (err error) {
 		}
 	}
 	return
+}
+
+func ExifOrientation(path string) int {
+	f, err := os.Open(path)
+	if err != nil {
+		return topLeftSide
+	}
+	defer f.Close()
+
+	x, err := exif.Decode(f)
+	if err != nil || x == nil {
+		return topLeftSide
+	}
+
+	orient, err := x.Get(exif.Orientation)
+	if err != nil || orient == nil {
+		return topLeftSide
+	}
+
+	v, err := orient.Int(0)
+	if err != nil {
+		return topLeftSide
+	}
+
+	return v
+}
+
+// Exif Orientation Tag values
+// http://sylvana.net/jpegcrop/exif_orientation.html
+const (
+	topLeftSide     = 1
+	topRightSide    = 2
+	bottomRightSide = 3
+	bottomLeftSide  = 4
+	leftSideTop     = 5
+	rightSideTop    = 6
+	rightSideBottom = 7
+	leftSideBottom  = 8
+)
+
+func reorient(img image.Image, orient int) *image.NRGBA {
+	switch orient {
+	case topLeftSide:
+		return imaging.Clone(img)
+	case topRightSide:
+		return imaging.FlipV(img)
+	case bottomRightSide:
+		return imaging.Rotate180(img)
+	case bottomLeftSide:
+		return imaging.Rotate180(imaging.FlipV(img))
+	case leftSideTop:
+		return imaging.Rotate270(imaging.FlipV(img))
+	case rightSideTop:
+		return imaging.Rotate270(img)
+	case rightSideBottom:
+		return imaging.Rotate90(imaging.FlipV(img))
+	case leftSideBottom:
+		return imaging.Rotate90(img)
+	}
+	return imaging.Clone(img)
 }
